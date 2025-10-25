@@ -5,22 +5,23 @@ type ListGroupProps = {
   setSelectedTab: (tab: TABS) => void;
   selectedTab: TABS;
 };
+const tabs: TABS[] = [
+  TABS.HOME,
+  TABS.EXPENSES,
+  TABS.TRIPS,
+  TABS.APPROVALS,
+  TABS.SETTINGS,
+  TABS.SUPPORT,
+];
 
 function ListGroup(props: ListGroupProps) {
-  const tabs: TABS[] = [
-    TABS.HOME,
-    TABS.EXPENSES,
-    TABS.TRIPS,
-    TABS.APPROVALS,
-    TABS.SETTINGS,
-    TABS.SUPPORT,
-  ];
   return (
     <>
       <ul className="nav flex-column" style={{ textAlign: "left" }}>
         {tabs.map((tab) => {
           return (
             <li
+              key={tab}
               onClick={() => {
                 props.setSelectedTab(tab);
               }}
@@ -45,7 +46,6 @@ function ListGroup(props: ListGroupProps) {
                   filter: "invert(1)",
                 }}
               />
-
               {tab}
             </li>
           );

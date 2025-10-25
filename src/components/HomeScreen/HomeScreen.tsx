@@ -1,6 +1,61 @@
+import React, { Suspense, lazy } from "react";
 import { FIELD } from "../../App.interface";
 import "chart.js/auto";
-import { Bar } from "react-chartjs-2";
+import {
+  Field_MAP,
+  IFieldData,
+  MONTHLY_REPORT_DATA,
+} from "./HomeScreen.constant";
+
+const pageContainerStyle: React.CSSProperties = {
+  height: "100vh",
+  backgroundColor: "rgb(40, 39, 39)",
+  padding: "30px",
+};
+
+const MonthlyReportChart = lazy(() =>
+  import("./MonthlyReportChart").then((module) => ({ default: module.default }))
+);
+
+const mainContainerStyle: React.CSSProperties = {
+  backgroundColor: "rgb(0, 0, 0)",
+  height: "100%",
+  padding: " 5% 3% 3% 3%",
+  color: "rgb(205, 201, 200)",
+};
+
+const cardStyle: React.CSSProperties = {
+  backgroundColor: "rgb(40, 39, 39)",
+  borderRadius: "10px",
+  margin: "1%",
+};
+
+const hrStyle: React.CSSProperties = {
+  border: "1px solid white",
+  margin: "10px 0",
+};
+
+const listItemStyle: React.CSSProperties = {
+  display: "flex",
+  justifyContent: "space-between",
+  padding: "2px",
+};
+
+const threeColListItemStyle: React.CSSProperties = {
+  ...listItemStyle,
+  display: "grid",
+  gridTemplateColumns: "2fr 1fr 1fr",
+  textAlign: "left",
+  overflowY: "auto",
+};
+
+const amountColStyle: React.CSSProperties = {
+  textAlign: "center",
+};
+
+const dateColStyle: React.CSSProperties = {
+  textAlign: "right",
+};
 
 function HomeScreen() {
   const field: FIELD[] = [
@@ -11,49 +66,43 @@ function HomeScreen() {
     FIELD.UNREPORTED_ADVANCES,
   ];
 
+  const recentExpenses = [
+    { name: "Subject", amount: "Amount" },
+    { name: "Pending approval", amount: "100" },
+    { name: "New Trip", amount: "100" },
+    { name: "unreported expense", amount: "100" },
+    { name: "upcomming expense", amount: "100" },
+  ];
+
   return (
     <>
-      <div
-        style={{
-          height: "100vh",
-          backgroundColor: "rgb(40, 39, 39)",
-          padding: "30px",
-        }}
-      >
-        <div
-          className="container"
-          style={{
-            backgroundColor: "rgb(0, 0, 0)",
-            height: "100%",
-            padding: " 5% 3% 3% 3%",
-            color: "rgb(205, 201, 200)",
-          }}
-        >
+      <div style={pageContainerStyle}>
+        <div className="container" style={mainContainerStyle}>
           <div className="row">
             <div
               className="col"
               style={{
+                ...cardStyle,
                 height: "30%",
                 width: "32%",
-                backgroundColor: "rgb(40, 39, 39)",
-                borderRadius: "10px",
-                margin: "1%",
+                overflowY: "auto",
               }}
             >
-              Pending Task
-              <hr style={{ border: "1px solid white", margin: "10px 0" }} />
-              <ul>
-                {field.map((field) => {
+              Upcoming SIPs
+              <hr style={hrStyle} />
+              <ul style={{ listStyle: "none", padding: 0 }}>
+                <li style={threeColListItemStyle}>
+                  <strong>Name</strong>
+                  <strong style={amountColStyle}>Amount</strong>
+                  <strong style={dateColStyle}>Date</strong>
+                </li>
+                {field.map((fieldKey) => {
+                  const item: IFieldData = Field_MAP[fieldKey];
                   return (
-                    <li
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        padding: "2px",
-                      }}
-                    >
-                      <span>{field}</span>
-                      <span>100</span>
+                    <li key={fieldKey} style={threeColListItemStyle}>
+                      <span>{item.name}</span>
+                      <span style={amountColStyle}>{item.amount}</span>
+                      <span style={dateColStyle}>{item.date}</span>
                     </li>
                   );
                 })}
@@ -62,89 +111,34 @@ function HomeScreen() {
             <div
               className="col-1"
               style={{
+                ...cardStyle,
                 height: "30%",
                 width: "52%",
-                backgroundColor: "rgb(40, 39, 39)",
-                borderRadius: "10px",
-                margin: "1%",
+                overflowY: "auto",
               }}
             >
               Recent expenses
-              <hr style={{ border: "1px solid white", margin: "10px 0" }} />
-              <ul>
-                <li
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    padding: "2px",
-                  }}
-                >
-                  <span>Subject</span>
-                  <span>Amount</span>
-                </li>
-                <li
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    padding: "2px",
-                  }}
-                >
-                  <span>Pending approval</span>
-                  <span>100</span>
-                </li>
-                <li
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    padding: "2px",
-                  }}
-                >
-                  <span>New Trip</span>
-                  <span>100</span>
-                </li>
-                <li
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    padding: "2px",
-                  }}
-                >
-                  <span>unreported expense</span>
-                  <span>100</span>
-                </li>
-                <li
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    padding: "2px",
-                  }}
-                >
-                  <span>upcomming expense</span>
-                  <span>100</span>
-                </li>
+              <hr style={hrStyle} />
+              <ul style={{ listStyle: "none", padding: 0 }}>
+                {recentExpenses.map((expense, index) => (
+                  <li key={index} style={listItemStyle}>
+                    <span>{expense.name}</span>
+                    <span
+                      style={{ textAlign: index === 0 ? "right" : "center" }}
+                    >
+                      {expense.amount}
+                    </span>
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
           <div className="row">
-            <div
-              className="col"
-              style={{
-                width: "100%",
-                backgroundColor: "rgb(40, 39, 39)",
-                borderRadius: "10px",
-                margin: "1%",
-              }}
-            >
+            <div className="col" style={{ ...cardStyle, width: "100%" }}>
               Quick Access
-              <hr style={{ border: "1px solid white", margin: "10px 0" }} />
+              <hr style={hrStyle} />
               <ul>
-                <li
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    padding: "2px",
-                  }}
-                >
+                <li style={listItemStyle}>
                   <span
                     style={{
                       padding: "2%",
@@ -188,42 +182,13 @@ function HomeScreen() {
           <div className="row">
             <div
               className="col"
-              style={{
-                width: "100%",
-                backgroundColor: "rgb(40, 39, 39)",
-                borderRadius: "10px",
-                margin: "1%",
-              }}
+              style={{ ...cardStyle, width: "100%", height: "40%" }}
             >
               Monthly Report
-              <hr style={{ border: "1px solid white", margin: "10px 0" }} />
-              <div style={{ height: "100 %", width: "100%" }}>
-                <Bar
-                  data={{
-                    labels: ["shares", "FD", "current account"],
-                    datasets: [
-                      {
-                        label: "Monthly Report",
-                        data: [1, 2, 10],
-                        backgroundColor: [
-                          "rgba(75, 192, 192, 0.2)",
-                          "rgba(153, 102, 255, 0.2)",
-                          "rgba(255, 159, 64, 0.2)",
-                        ],
-                        borderColor: [
-                          "rgba(75, 192, 192, 1)",
-                          "rgba(153, 102, 255, 1)",
-                          "rgba(255, 159, 64, 1)",
-                        ],
-                        borderWidth: 1,
-                      },
-                    ],
-                  }}
-                  options={{
-                    maintainAspectRatio: false,
-                  }}
-                />
-              </div>
+              <hr style={hrStyle} />
+              <Suspense fallback={<div>Loading chart...</div>}>
+                <MonthlyReportChart />
+              </Suspense>
             </div>
           </div>
         </div>
