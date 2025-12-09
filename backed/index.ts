@@ -1,13 +1,24 @@
 import express from 'express';
 require('dotenv').config();
 import mongoose from 'mongoose';
-import { getamount, updateAmount } from './db-operations';
+import cors from 'cors';
+import { getamount, addExpense } from './db-operations';
+import multer from 'multer';
 
 const uri = process.env.MONGO_URI;
 const credentials = process.env.MONGO_CERT_PATH;
 const dbName = process.env.DB_NAME;
 const app = express();
 const port = process.env.PORT || 3001;
+
+// Enable CORS for all routes
+app.use(cors());
+
+// Middleware to handle multipart/form-data
+// This will parse the form fields and make them available on req.body
+// It will ignore files for now.
+const upload = multer();
+app.use(upload.none()); // .none() because we are only handling text fields for now
 
 if (!uri || !credentials || !dbName) {
   throw new Error('Please define MONGO_URI, MONGO_CERT_PATH, and DB_NAME in your .env file');
@@ -31,33 +42,35 @@ app.get('/api/message', (req, res) => {
   res.json({ message: 'Hello from the backend!' });
 });
 
-app.get('/api/Updateamount', async (req, res) => {
-  const { category, amount } = req.query;
+app.post('/api/expenses', async (req, res) => {
+  try {
+    // Data is now in req.body thanks to multer
+    const { category, subject, merchant, date, amount } = req.body;
 
-  if (typeof category !== 'string' || !amount) {
-    return res.status(400).json({ message: 'Both "category" and "amount" are required query parameters.' });
+    if (!category || !subject || !date || !amount) {
+      return res.status(400).json({ success: false, message: 'Missing required fields.' });
+    }
+
+    const expenseData = {
+      category,
+      subject,
+      merchant: merchant || '',
+      date: new Date(date),
+      amount: Number(amount),
+    };
+
+    const newExpense = await addExpense(expenseData);
+    return res.status(201).json({ success: true, data: newExpense });
+  } catch (error) {
+    console.error('API Error:', error);
+    return res.status(500).json({ success: false, message: 'Server error while creating expense.' });
   }
-
-  const amountNumber = Number(amount);
-  if (isNaN(amountNumber)) {
-    return res.status(400).json({ message: 'The "amount" parameter must be a valid number.' });
-  }
-
-  await updateAmount(category, amountNumber);
-  res.json({
-    message: `Successfully triggered update for category '${category}'. Check server logs for details.`
-  });
 });
 
 app.get('/api/getamount', async (req, res) => {
-  const category = req.query.category;
-
-  if (typeof category !== 'string') {
-    return res.status(400).json({ message: 'The "category" parameter must be a valid string.' });
-  }
-
-  await getamount(category);
-  res.json({ message: 'Database operations performed. Check server logs for details.' });
+  // Call the getamount function to fetch data from the DB
+  const data = await getamount();
+  res.json(data);
 });
 
 async function startServer() {

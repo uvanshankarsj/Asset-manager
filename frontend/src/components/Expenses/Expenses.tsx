@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 const field = [
   "category",
   "Subject",
@@ -10,7 +10,7 @@ const field = [
 
 const categoryOptions = [
   "Select a category",
-  "Fixed deposit",
+  "FD",
   "share",
   "Mutual Funds",
   "Other",
@@ -58,11 +58,95 @@ const inputStyle: React.CSSProperties = {
   color: "rgb(205, 201, 200)",
 };
 
+const buttonStyle: React.CSSProperties = {
+  padding: "12px 25px",
+  borderRadius: "5px",
+  border: "none",
+  backgroundColor: "rgb(205, 201, 200)",
+  color: "rgb(40, 39, 39)",
+  fontWeight: "bold",
+  cursor: "pointer",
+  fontSize: "16px",
+};
+
 const Expenses: React.FC = () => {
+  const [formData, setFormData] = useState({
+    category: categoryOptions[0],
+    subject: "",
+    merchant: "",
+    date: "",
+    amount: "",
+    attachments: null as File | null,
+  });
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value, type } = e.target;
+    console.log(name, value, type);
+
+    if (type === "file") {
+      const files = (e.target as HTMLInputElement).files;
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: files ? files[0] : null,
+      }));
+    } else {
+      setFormData((prevData) => ({
+        ...prevData,
+        [name]: value,
+      }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    // --- FRONTEND VALIDATION ---
+    if (
+      formData.category === "Select a category" ||
+      !formData.subject ||
+      !formData.date ||
+      !formData.amount
+    ) {
+      alert(
+        "Please fill out all required fields: Category, Subject, Date, and Amount."
+      );
+      return; // Stop the submission
+    }
+
+    console.log("Submitting data:", formData);
+
+    // You would typically send this to your backend API
+    // For file uploads, you often use FormData
+    const data = new FormData();
+    Object.entries(formData).forEach(([key, value]) => {
+      if (value) {
+        data.append(key, value);
+      }
+    });
+
+    // Example POST request
+    try {
+      const response = await fetch("/api/expenses", {
+        method: "POST",
+        body: data, // Use FormData for multipart/form-data
+      });
+      if (response.ok) {
+        console.log("Expense saved successfully!");
+        // Optionally reset form or navigate away
+      } else {
+        console.error("Failed to save expense.");
+      }
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
+  };
+
   return (
     <>
       <div style={containerStyle}>
-        <form style={formStyle}>
+        <form style={formStyle} onSubmit={handleSubmit}>
           <h1>New expense</h1>
           <hr style={hrStyle} />
           {field.map((fieldName) => {
@@ -76,6 +160,8 @@ const Expenses: React.FC = () => {
                     id={fieldName}
                     name={fieldName.toLowerCase()}
                     style={inputStyle}
+                    value={formData.category}
+                    onChange={handleChange}
                   >
                     {categoryOptions.map((option) => (
                       <option key={option} value={option}>
@@ -89,6 +175,7 @@ const Expenses: React.FC = () => {
                     id={fieldName}
                     name={fieldName.toLowerCase()}
                     style={inputStyle}
+                    onChange={handleChange}
                   />
                 ) : (
                   <input
@@ -103,11 +190,22 @@ const Expenses: React.FC = () => {
                     name={fieldName.toLowerCase()}
                     placeholder={`Enter your ${fieldName} here`}
                     style={inputStyle}
+                    value={
+                      formData[
+                        fieldName.toLowerCase() as keyof typeof formData
+                      ] as string
+                    }
+                    onChange={handleChange}
                   />
                 )}
               </div>
             );
           })}
+          <div style={{ textAlign: "right", marginTop: "20px" }}>
+            <button type="submit" style={buttonStyle}>
+              Submit Expense
+            </button>
+          </div>
         </form>
       </div>
     </>
