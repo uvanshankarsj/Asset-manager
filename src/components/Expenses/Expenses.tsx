@@ -1,3 +1,16 @@
+/*
+ * TODO
+ * always give styles in stylesheet. no inline styles
+ * eg of inline styles:
+ * <div style={{ backgroundColor: "red" }}>
+ *   <h1>Hello</h1>
+ * </div>
+ *
+ * eg of stylesheet:
+ * <div className="bg-red-500">
+ *   <h1>Hello</h1>
+ * </div>
+ */
 const Expenses: React.FC = () => {
   const field = [
     "Subject",
@@ -28,6 +41,9 @@ const Expenses: React.FC = () => {
           <h1>New expense</h1>
           <hr style={{ border: "1px solid white", margin: "10px 0" }} />
           {field.map((field) => {
+            {
+              /* TODO: add key here for list items  (learn what key does to component in react)*/
+            }
             return (
               <div
                 style={{
