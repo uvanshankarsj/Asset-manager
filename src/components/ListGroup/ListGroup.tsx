@@ -10,17 +10,18 @@ function ListGroup(props: ListGroupProps) {
   const tabs: TABS[] = [
     TABS.HOME,
     TABS.EXPENSES,
-    TABS.TRIPS,
-    TABS.APPROVALS,
+    TABS.ASSETS,
+    TABS.INVESTMENTS,
     TABS.SETTINGS,
     TABS.SUPPORT,
   ];
   return (
     <>
-      <ul className="nav flex-column" style={{ textAlign: "left" }}>
+      <ul className="nav flex-column align-items-center">
         {tabs.map((tab) => {
           return (
             <li
+              key={tab}
               onClick={() => {
                 props.setSelectedTab(tab);
               }}
@@ -55,6 +56,7 @@ function ListGroup(props: ListGroupProps) {
         style={{
           display: "flex",
           alignItems: "flex-end",
+          justifyContent: "center",
           background:
             "linear-gradient(to right, white, rgb(5, 186, 162), rgb(4, 115, 117))",
           WebkitBackgroundClip: "text",

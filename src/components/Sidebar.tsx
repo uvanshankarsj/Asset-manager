@@ -1,20 +1,23 @@
 import { TABS } from "../App.interface";
+import type { AuthUser } from "../api";
 import Profile from "./Account";
 import ListGroup from "./ListGroup/ListGroup";
 
 type SidebarProps = {
   setSelectedTab: (tab: TABS) => void;
   selectedTab: TABS;
+  user: AuthUser;
+  onUserChange: (user: AuthUser) => void;
+  onLogout: () => void;
 };
-export const Sidebar = (props: SidebarProps) => {
-  console.log("sidebar rendered");
+export const Sidebar = ({ user, onUserChange, onLogout, ...listProps }: SidebarProps) => {
   return (
     <>
       <div
         style={{
           backgroundColor: "rgb(40, 39, 39)",
           height: "100vh",
-          width: "110%",
+          width: "100%",
           padding: "20px",
         }}
       >
@@ -23,9 +26,14 @@ export const Sidebar = (props: SidebarProps) => {
             textAlign: "center",
           }}
         >
-          <Profile />
+          <Profile user={user} onUserChange={onUserChange} />
         </div>
-        <ListGroup {...props} />
+        <ListGroup {...listProps} />
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
+          <button className="btn btn-outline-light btn-sm" onClick={onLogout}>
+            Log out
+          </button>
+        </div>
       </div>
     </>
   );

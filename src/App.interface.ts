@@ -2,8 +2,8 @@
 export enum TABS {
     HOME = "Home",
     EXPENSES = "Expenses",
-    TRIPS = "Trips",
-    APPROVALS = "Approvals",
+    ASSETS = "Assets",
+    INVESTMENTS = "Investments",
     SETTINGS = "Settings",
     SUPPORT = "Support",
 }
