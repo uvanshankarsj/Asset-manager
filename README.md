@@ -1,12 +1,21 @@
-# Asset Manager
+# Expensio (Asset Manager)
 
-Track your investments (FDs, mutual funds, shares) in one place.
+A personal investment, asset and expense tracker. Sign up, record your FDs, mutual funds, shares and other assets, and see what needs attention at a glance. Each account only ever sees its own data.
 
-- **Home** shows what needs your attention (FDs that have matured, SIPs that are due), your recent actions, and a chart of your holdings.
-- **Expenses** is where you add a new record. An FD takes a maturity date, a mutual fund takes a next-SIP date.
-- When an FD matures you confirm and delete it. When a SIP is paid, its next date moves forward one month automatically. Everything you do is recorded in Recent Transactions.
+Built with React 19 + TypeScript + Vite (frontend) and Express 5 + MongoDB Atlas (backend).
 
-Built with React + TypeScript + Vite (frontend) and Express + MongoDB (backend).
+## Features
+
+- **Accounts**: register, log in and log out. Passwords are hashed with bcrypt and sessions use 7-day JWTs. Every record belongs to one account and the API filters by it.
+- **Profile picture**: upload a photo (cropped to a square in the browser) or fall back to your initial. It is saved to your account.
+- **Home dashboard**: FDs that have matured, SIPs that are due, recent transactions and a chart of your holdings.
+- **Expenses / new records**: add an FD (with maturity date), a mutual fund (with next-SIP date), shares or other items.
+- **Investments**: list, edit and delete holdings. Shares track quantity, average price and ticker, with live prices and ticker search.
+- **Assets**: add, edit and delete assets such as property or gold.
+- **FD and SIP handling**: confirm and delete a matured FD. Paying a SIP moves its next date forward one month. Everything is logged in Recent Transactions.
+- **Edit records**: change names, dates, amounts, quantities and tickers from a modal.
+- **Validation and feedback**: inline field errors, toast messages for success and failure, loading states, and a "session expired" logout on a 401.
+- **Responsive layout**: on screens under 768px the sidebar becomes a slide-in menu and pages scroll normally.
 
 ## Quick start
 
@@ -43,7 +52,8 @@ You do not need to create the database or tables yourself. They are created auto
 | `npm start` | Runs the backend (port 3001) and the frontend (port 5173) together |
 | `npm run build` | Type-checks and builds the frontend into `dist/` |
 | `npm run lint` | Runs ESLint |
-| `npm run test:e2e` | End-to-end test of the FD / SIP flow (see below) |
+| `npm run test:e2e` | End-to-end API tests: FD / SIP flow, accounts, data isolation, avatars, editing (see below) |
+| `npm run claim-data -- <email>` | Assigns records created before accounts existed (no owner) to the account with that email |
 
 `npm run setup` can also run without prompts:
 `npm run setup -- --username me --password secret --cluster cluster0.abc12.mongodb.net --db asset_manager`
@@ -58,12 +68,31 @@ You do not need to create the database or tables yourself. They are created auto
 | `MONGO_CLUSTER` | Cluster address, e.g. `cluster0.abc12.mongodb.net` |
 | `DB_NAME` | Database name (default `asset_manager`) |
 | `PORT` | Backend port (default `3001`) |
+| `JWT_SECRET` | Long random string used to sign login tokens. If unset, a random one is used and everyone is logged out on each restart. Generate one with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
 | `MONGO_URI` | Optional. A full connection string that replaces the three `MONGO_*` values above |
 | `MONGO_CERT_PATH` | Optional. Client certificate, if you use certificate authentication |
 
 If you run the backend somewhere other than `http://localhost:3001`, set `VITE_API_URL` for the frontend (for example in a `.env` file in the project root).
 
 `backed/.env` holds your password. It is git-ignored, so it never gets committed. Do not share it.
+
+## API
+
+Everything under `/api` except `/api/auth/register` and `/api/auth/login` needs an `Authorization: Bearer <token>` header.
+
+| Method and path | Purpose |
+|---|---|
+| `POST /api/auth/register`, `POST /api/auth/login` | Create an account or log in, returns a token and the user |
+| `GET /api/auth/me` | Current user |
+| `PUT /api/auth/avatar`, `DELETE /api/auth/avatar` | Set or remove the profile picture |
+| `POST /api/expenses`, `GET /api/expenses/recent` | Add a record, list recent ones |
+| `GET /api/getamount` | Totals per category |
+| `GET /api/pending-actions` | Matured FDs and due SIPs |
+| `DELETE /api/expenses/:id`, `POST /api/expenses/:id/sip-paid` | Remove a matured FD, mark a SIP paid |
+| `GET /api/investments`, `PUT` / `DELETE /api/investments/:id` | List, edit, delete holdings |
+| `GET /api/investments/prices`, `GET /api/stocks/search` | Live share prices, ticker search |
+| `GET /api/assets`, `POST /api/assets`, `PUT` / `DELETE /api/assets/:id` | Manage assets |
+| `GET /api/activity/recent`, `GET /api/activity/all` | Transaction log |
 
 ## Troubleshooting
 
@@ -77,7 +106,7 @@ If you run the backend somewhere other than `http://localhost:3001`, set `VITE_A
 
 ## Tests
 
-`npm run test:e2e` runs against the real backend and database. It creates temporary records (named `__test_...`), simulates dates passing, and deletes them afterwards. It checks FD maturity, SIP payment, the Recent Transactions log, totals and the guards against repeated actions.
+`npm run test:e2e` runs against the real backend and database. It registers throwaway users and creates temporary records (named `__test_...`), simulates dates passing, and deletes everything afterwards. It checks FD maturity, SIP payment, the Recent Transactions log, totals, guards against repeated actions, per-account data isolation, profile pictures and record editing.
 
 Add `SCREENSHOTS=1` to also save screenshots of the home screen to `tests/e2e/screenshots/` (needs the app running and Microsoft Edge).
 
@@ -86,6 +115,7 @@ Add `SCREENSHOTS=1` to also save screenshots of the home screen to `tests/e2e/sc
 ```
 src/            React frontend
 backed/         Express + MongoDB backend
-scripts/        Setup script
-tests/e2e/      End-to-end test
+scripts/        Setup and claim-data scripts
+tests/e2e/      End-to-end tests
+test-screenshots/  Screenshots from manual and browser testing
 ```
