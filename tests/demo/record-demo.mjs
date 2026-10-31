@@ -1,6 +1,6 @@
 // Records a narrated walkthrough of the app in Edge using a throwaway account, then deletes the account.
 // Needs the app running (npm start) and: npm install --no-save puppeteer-core ffmpeg-static
-// Run from the project root: node demo/record-demo.mjs
+// Run from the project root: npm run demo   (writes tests/demo/expensio-demo.mp4)
 import puppeteer from "puppeteer-core";
 import ffmpegPath from "ffmpeg-static";
 import { createRequire } from "node:module";
@@ -10,7 +10,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const ROOT = path.resolve(here, "..");
+const ROOT = path.resolve(here, "..", "..");
 const OUT_DIR = here;
 mkdirSync(OUT_DIR, { recursive: true });
 const VIDEO = path.join(OUT_DIR, "expensio-demo.mp4");

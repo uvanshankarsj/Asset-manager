@@ -12,6 +12,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "test:e2e": "node --test tests/e2e/*.test.mjs",
+    "test:ui": "node tests/ui/ui-test.mjs && node tests/ui/sidebar-check.mjs",
+    "demo": "node tests/demo/record-demo.mjs",
     "preview": "vite preview"
   },
   "engines": {
@@ -35,6 +37,7 @@
     "eslint-plugin-react-refresh": "^0.4.19",
     "globals": "^15.15.0",
     "prettier": "^3.5.3",
+    "puppeteer-core": "^25.16.0",
     "typescript": "~5.7.2",
     "typescript-eslint": "^8.24.1",
     "vite": "^6.2.0"
