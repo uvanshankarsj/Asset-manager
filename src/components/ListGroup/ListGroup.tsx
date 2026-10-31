@@ -25,7 +25,7 @@ function ListGroup(props: ListGroupProps) {
               onClick={() => {
                 props.setSelectedTab(tab);
               }}
-              className="nav-item"
+              className="nav-item sidebar-link"
               style={{
                 color:
                   props.selectedTab === tab
@@ -53,6 +53,7 @@ function ListGroup(props: ListGroupProps) {
         })}
       </ul>
       <div
+        className="sidebar-brand"
         style={{
           display: "flex",
           alignItems: "flex-end",

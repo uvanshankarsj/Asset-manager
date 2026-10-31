@@ -16,7 +16,6 @@ export const Sidebar = ({ user, onUserChange, onLogout, ...listProps }: SidebarP
       <div
         style={{
           backgroundColor: "rgb(40, 39, 39)",
-          height: "100vh",
           width: "100%",
           padding: "20px",
         }}
@@ -29,7 +28,7 @@ export const Sidebar = ({ user, onUserChange, onLogout, ...listProps }: SidebarP
           <Profile user={user} onUserChange={onUserChange} />
         </div>
         <ListGroup {...listProps} />
-        <div style={{ textAlign: "center", marginTop: "20px" }}>
+        <div className="sidebar-logout" style={{ textAlign: "center" }}>
           <button className="btn btn-outline-light btn-sm" onClick={onLogout}>
             Log out
           </button>

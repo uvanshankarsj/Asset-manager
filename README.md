@@ -69,6 +69,9 @@ You do not need to create the database or tables yourself. They are created auto
 | `DB_NAME` | Database name (default `asset_manager`) |
 | `PORT` | Backend port (default `3001`) |
 | `JWT_SECRET` | Long random string used to sign login tokens. If unset, a random one is used and everyone is logged out on each restart. Generate one with `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"` |
+| `CORS_ORIGIN` | Browser origins allowed to call the API, comma separated (default `http://localhost:5173,http://127.0.0.1:5173`). Set it to your site's address when you host the frontend |
+| `TRUST_PROXY` | Number of reverse proxies in front of the backend when deployed (usually `1` on Render or Railway), so the login limit sees real client IPs. Leave unset locally |
+| `AUTH_MAX_ATTEMPTS`, `AUTH_MAX_SIGNUPS` | Failed logins per 15 minutes and sign-ups per hour, per IP address (defaults 10 and 20) |
 | `MONGO_URI` | Optional. A full connection string that replaces the three `MONGO_*` values above |
 | `MONGO_CERT_PATH` | Optional. Client certificate, if you use certificate authentication |
 
@@ -110,12 +113,22 @@ Everything under `/api` except `/api/auth/register` and `/api/auth/login` needs 
 
 Add `SCREENSHOTS=1` to also save screenshots of the home screen to `tests/e2e/screenshots/` (needs the app running and Microsoft Edge).
 
+### Browser tests
+
+`npm run test:ui` drives the real app in Microsoft Edge with a throwaway account (login, add / edit / delete records, validation, profile photo, mobile menu, and that Log out is always visible at many window sizes). Start the app first with `npm start`. Set `EDGE_PATH` if Edge is installed somewhere else. The account and its data are deleted afterwards.
+
+### Demo video
+
+`npm run demo` records a captioned walkthrough of the app to `tests/demo/expensio-demo.mp4`. It needs the app running and one extra package that is not saved in `package.json` (it downloads a large binary): `npm install --no-save ffmpeg-static`.
+
 ## Project layout
 
 ```
 src/            React frontend
 backed/         Express + MongoDB backend
 scripts/        Setup and claim-data scripts
-tests/e2e/      End-to-end tests
+tests/e2e/      API end-to-end tests
+tests/ui/       Browser tests (Edge)
+tests/demo/     Demo video and the script that records it
 test-screenshots/  Screenshots from manual and browser testing
 ```

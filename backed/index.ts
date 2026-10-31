@@ -2,6 +2,8 @@ import 'dotenv/config';
 import express from 'express';
 import mongoose from 'mongoose';
 import cors from 'cors';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import { initDatabase, getamount, addExpense, getRecentExpenses, getPendingActions, deleteMaturedFD, markSipPaid, getRecentActivity, getAssets, addAsset, deleteAsset, getInvestments, getAllActivity, deleteInvestment, getSharePrices, searchStocks, updateAsset, updateInvestment } from './db-operations';
 import multer from 'multer';
 import { authRouter, requireAuth } from './auth';
@@ -10,8 +12,57 @@ import { getMongoUri, getConnectOptions, explainConnectionError } from './db-con
 const app = express();
 const port = process.env.PORT || 3001;
 
-// Enable CORS for all routes
-app.use(cors());
+// Behind a reverse proxy (Render, Railway, nginx, ...) every request appears to come from the proxy.
+// Set TRUST_PROXY to the number of proxies in front of this server (usually 1) so the real client IP is used,
+// which the login rate limit depends on. Leave it unset when running locally.
+if (process.env.TRUST_PROXY) {
+  const hops = Number(process.env.TRUST_PROXY);
+  app.set('trust proxy', Number.isInteger(hops) ? hops : process.env.TRUST_PROXY);
+}
+
+// Security headers (no sniffing, no framing, HSTS over https, ...)
+app.use(helmet());
+
+// Only the frontend may call this API from a browser.
+// Set CORS_ORIGIN in .env (comma separated) when the frontend is hosted somewhere else.
+const allowedOrigins = (process.env.CORS_ORIGIN ?? 'http://localhost:5173,http://127.0.0.1:5173')
+  .split(',')
+  .map((o) => o.trim().replace(/\/$/, ''))
+  .filter(Boolean);
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Requests without an Origin header (curl, server to server, tests) are not browser cross-site calls
+      if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+      return callback(null, false);
+    },
+  })
+);
+
+// Slow down password guessing. Failed logins count, successful ones don't.
+// Limits can be raised with AUTH_MAX_ATTEMPTS / AUTH_MAX_SIGNUPS in .env.
+const tooMany = { success: false, message: 'Too many attempts. Please wait a few minutes and try again.' };
+app.use(
+  '/api/auth/login',
+  rateLimit({
+    windowMs: 15 * 60 * 1000,
+    limit: Number(process.env.AUTH_MAX_ATTEMPTS) || 10,
+    skipSuccessfulRequests: true,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: tooMany,
+  })
+);
+app.use(
+  '/api/auth/register',
+  rateLimit({
+    windowMs: 60 * 60 * 1000,
+    limit: Number(process.env.AUTH_MAX_SIGNUPS) || 20,
+    standardHeaders: 'draft-7',
+    legacyHeaders: false,
+    message: tooMany,
+  })
+);
 
 // Middleware to handle multipart/form-data
 // This will parse the form fields and make them available on req.body

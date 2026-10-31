@@ -77,12 +77,12 @@ function Profile({ user, onUserChange }: ProfileProps) {
         <img
           src={user.avatar}
           alt="profile image"
-          className="rounded-circle border border-white border-5"
+          className="sidebar-avatar rounded-circle border border-white border-5"
           style={{ ...circle, objectFit: "cover", display: "block" }}
         />
       ) : (
         <div
-          className="rounded-circle border border-white border-5 align-items-center justify-content-center"
+          className="sidebar-avatar rounded-circle border border-white border-5 align-items-center justify-content-center"
           style={{
             ...circle,
             fontSize: "40px",
